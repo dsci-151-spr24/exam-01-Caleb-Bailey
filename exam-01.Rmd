@@ -139,29 +139,128 @@ print(airline_flights)
 ```{r}
 
 
+non_missing_arrival_delay <- flights_data_2013 %>%
+  filter(!is.na(arr_delay))
 
+highest_mean_arrival_delay <- non_missing_arrival_delay %>%
+  group_by(carrier) %>%
+  summarise(mean_arrival_delay = mean(arr_delay, na.rm = TRUE)) %>%
+  arrange(desc(mean_arrival_delay)) %>%
+  head(1)
+
+lowest_mean_arrival_delay <- non_missing_arrival_delay %>%
+  group_by(carrier) %>%
+  summarise(mean_arrival_delay = mean(arr_delay, na.rm = TRUE)) %>%
+  arrange(mean_arrival_delay) %>%
+  head(1)
+
+print("Question 3:")
+print("a. Carrier with the highest mean arrival delay:")
+print(highest_mean_arrival_delay)
+print("b. Carrier with the lowest mean arrival delay:")
+print(lowest_mean_arrival_delay)
 
 
 ```
 
     a\.
     Which carrier had the highest mean arrival delay?
+    ***F9***
 
     b\.
     Which carrier had the lowest mean arrival delay?
+    ***AS***
 
 4.  **Question 4 (10 points)** - What was the mean temperature at the origin airport on the day with the highest departure delay?
     Your answer should include the name of origin airport, the date with the highest departure delay, and the mean temperature on that day.
+    
+    
+```{r}
+
+highest_departure_delay <- flights_data_2013 %>%
+  filter(dep_delay == max(dep_delay, na.rm = TRUE))
+
+mean_temp_highest_dep_delay <- `weather` %>%
+  filter(origin %in% highest_departure_delay$origin,
+         year == highest_departure_delay$year,
+         month == highest_departure_delay$month,
+         day == highest_departure_delay$day) %>%
+  summarise(mean_temp = mean(temp, na.rm = TRUE))
+
+print("Question 4:")
+print("Mean temperature at the origin airport on the day with the highest departure delay:")
+print(mean_temp_highest_dep_delay)
+
+
+
+
+
+```
 
 5.  **Question 5 (15 points)** - Consider breaking the day into four time intervals: 12:01am-6am, 6:01am-12pm, 12:01pm-6pm, 6:01pm-12am.
 
+```{r}
+
+
+flights_data_2013 <- flights_data_2013 %>%
+  mutate(dep_time_interval = case_when(
+    dep_time >= 1 & dep_time <= 600 ~ "12:01am-6am",
+    dep_time > 600 & dep_time <= 1200 ~ "6:01am-12pm",
+    dep_time > 1200 & dep_time <= 1800 ~ "12:01pm-6pm",
+    dep_time > 1800 & dep_time <= 2400 ~ "6:01pm-12am",
+    TRUE ~ NA_character_
+  ))
+
+delayed_flights_by_interval <- flights_data_2013 %>%
+  group_by(dep_time_interval) %>%
+  summarise(prop_delayed = mean(dep_delay > 0, na.rm = TRUE))
+
+print("Question 5:")
+print("a. Proportion of flights delayed at each time interval:")
+print(delayed_flights_by_interval)
+
+
+```
+
+
     a\.
     Calculate the proportion of flights that are delayed at departure at each of these time intervals.
+    
+    ***12:01 am - 6 am = 16.62%
+    12:01 pm - 6 pm = 44.02%
+    6:01 am - 12 pm = 24.72%
+    6:01 pm - 12 am = 57.03%***
+    
 
     b\.
     Comment on how the likelihood of being delayed change throughout the day?
+    
+    ***The later in the day it is, the more likely your flight will be delayed.***
 
 6.  **Question 6 (15 points)** - Find the flight with the longest air time.
+
+
+```{r}
+
+longest_air_time_flight <- flights_data_2013 %>%
+  arrange(desc(air_time)) %>%
+  slice(1)
+
+print("Question 6:")
+print("a. Duration of the longest air time flight:")
+print(longest_air_time_flight$air_time)
+
+
+print("b. City to which the longest air time flight flew:")
+
+
+
+
+print("c. Number of seats of the plane that flew the longest air time flight:")
+
+
+
+```
 
     a\.
     How long is this flight?
@@ -180,6 +279,13 @@ print(airline_flights)
     *Hint:* You will first need to limit your analysis to the Contiguous United States.
     [This Wikipedia article](https://en.wikipedia.org/wiki/List_of_extreme_points_of_the_United_States) can help, but you're welcomed to use other resources as well.
     Make sure to cite whatever resource you use.
+    
+```{r}
+
+
+
+
+```
 
 8.  **Question 8 (15 pts)** - Recreate the plot included below using the `flights` data.
     Once you have created the visualization, in no more than one paragraph, describe what you think the point of this visualization might be.
